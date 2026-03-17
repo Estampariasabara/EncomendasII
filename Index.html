@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encomenda de Camisas - Fábrica</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 15px; background-color: #f0f2f5; color: #333; }
+        .container { max-width: 450px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: auto; }
+        .logo-container { text-align: center; margin-bottom: 20px; }
+        .logo-container img { max-width: 150px; height: auto; border-radius: 10px; }
+        h2 { color: #075e54; text-align: center; margin-top: 0; }
+        label { font-weight: bold; display: block; margin-top: 15px; font-size: 14px; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .btn-add { background-color: #25d366; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .btn-send { background-color: #128c7e; color: white; border: none; font-weight: bold; margin-top: 25px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border-bottom: 1px solid #eee; padding: 12px 8px; text-align: left; font-size: 14px; }
+        th { background-color: #f8f9fa; color: #666; }
+        .btn-del { background-color: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        .resumo { background: #e7f3ef; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 5px solid #128c7e; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo-container">
+        <img src="https://via.placeholder.com/150x80?text=TUA+LOGO" alt="Logo">
+    </div>
+
+    <h2>Pedido Interclasse</h2>
+    
+    <label>Tamanho:</label>
+    <select id="tamanho">
+        <option value="PP">PP</option><option value="PI">PI</option><option value="MI">MI</option>
+        <option value="GI">GI</option><option value="P">P</option><option value="M">M</option>
+        <option value="G">G</option><option value="GG">GG</option><option value="XG1">XG1</option>
+        <option value="XG2">XG2</option><option value="PPBL">PPBL</option><option value="PBL">PBL</option>
+        <option value="MBL">MBL</option><option value="GBL">GBL</option><option value="GGBL">GGBL</option>
+    </select>
+
+    <label>Nome na Camisa:</label>
+    <input type="text" id="nome" placeholder="Ex: NEYMAR JR">
+
+    <label>Número:</label>
+    <input type="number" id="numero" placeholder="Ex: 10">
+
+    <button class="btn-add" onclick="adicionarCamisa()">+ Adicionar à Lista</button>
+
+    <table>
+        <thead>
+            <tr><th>Tam.</th><th>Nome</th><th>Nº</th><th></th></tr>
+        </thead>
+        <tbody id="corpoTabela"></tbody>
+    </table>
+
+    <div id="resumoArea" class="resumo" style="display:none;">
+        <strong>Resumo do Pedido:</strong>
+        <div id="detalhesResumo"></div>
+        <hr>
+        <strong>Total Geral: <span id="totalGeral">0</span> camisas</strong>
+    </div>
+
+    <button class="btn-send" onclick="enviarWhatsApp()">Enviar Tudo por WhatsApp 📱</button>
+</div>
+
+<script>
+    let listaCamisas = [];
+    const MEU_WHATSAPP = "5531973632355"; // <--- MUDA PARA O TEU NÚMERO AQUI
+
+    function adicionarCamisa() {
+        const tam = document.getElementById('tamanho').value;
+        const nome = document.getElementById('nome').value.trim().toUpperCase();
+        const num = document.getElementById('numero').value;
+
+        if(!nome || !num) { alert("Preenche o Nome e o Número!"); return; }
+
+        // 1. BLOQUEIO DUPLICADO
+        const jaExiste = listaCamisas.find(c => c.num === num);
+        if(jaExiste) {
+            alert("⚠️ O número " + num + " já foi usado por: " + jaExiste.nome);
+            return;
+        }
+
+        listaCamisas.push({ tam, nome, num });
+        atualizarInterface();
+        
+        document.getElementById('nome').value = "";
+        document.getElementById('numero').value = "";
+    }
+
+    // 4. BOTÃO DE APAGAR
+    function removerCamisa(index) {
+        listaCamisas.splice(index, 1);
+        atualizarInterface();
+    }
+
+    function atualizarInterface() {
+        const corpo = document.getElementById('corpoTabela');
+        corpo.innerHTML = "";
+        
+        let contagemTamanhos = {};
+
+        listaCamisas.forEach((item, index) => {
+            corpo.innerHTML += `<tr>
+                <td>${item.tam}</td>
+                <td>${item.nome}</td>
+                <td>${item.num}</td>
+                <td><button class="btn-del" onclick="removerCamisa(${index})">X</button></td>
+            </tr>`;
+            
+            // Lógica do Totalizador por tamanho
+            contagemTamanhos[item.tam] = (contagemTamanhos[item.tam] || 0) + 1;
+        });
+
+        // Atualiza a área de Resumo
+        const resumoArea = document.getElementById('resumoArea');
+        if(listaCamisas.length > 0) {
+            resumoArea.style.display = "block";
+            document.getElementById('totalGeral').innerText = listaCamisas.length;
+            
+            let resumoTexto = "";
+            for (let t in contagemTamanhos) {
+                resumoTexto += `<span>${t}: ${contagemTamanhos[t]} | </span>`;
+            }
+            document.getElementById('detalhesResumo').innerHTML = resumoTexto;
+        } else {
+            resumoArea.style.display = "none";
+        }
+    }
+
+    function enviarWhatsApp() {
+        if(listaCamisas.length === 0) { alert("A lista está vazia!"); return; }
+
+        let msg = "*NOVO PEDIDO DE CAMISAS*\n\n";
+        listaCamisas.forEach(i => msg += `${i.tam} | ${i.nome} | ${i.num}\n`);
+        msg += `\n*TOTAL:* ${listaCamisas.length} camisas`;
+
+        window.open(`https://wa.me/${MEU_WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+</script>
+</body>
+</html>
