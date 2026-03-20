@@ -6,21 +6,24 @@
     <title>Estamparia Sabará - Pedidos</title>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; }
-        .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
+        .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 5px; }
+        p.sub { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
         label { display: block; margin-top: 10px; font-weight: bold; }
-        input, select, button { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        input, select, button { width: 100%; padding: 12px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
         button { background-color: #25d366; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 15px; }
         button:hover { background-color: #128c7e; }
-        .lista { margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; }
-        .item { background: #eee; padding: 5px; margin-bottom: 5px; border-radius: 3px; font-size: 14px; }
-        #resumo { font-weight: bold; color: #555; margin-top: 10px; font-size: 13px; }
+        .lista { margin-top: 20px; border-top: 2px solid #eee; padding-top: 10px; }
+        .item { background: #f9f9f9; padding: 8px; margin-bottom: 5px; border-left: 4px solid #25d366; font-size: 14px; display: flex; justify-content: space-between; }
+        #resumo-box { background: #e7f3ef; padding: 10px; margin-top: 15px; border-radius: 5px; font-size: 13px; color: #333; line-height: 1.6; }
+        .total-destaque { font-weight: bold; color: #075e54; font-size: 15px; display: block; margin-top: 5px; border-top: 1px solid #ccc; padding-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Estamparia Sabará</h2>
+    <p class="sub">Monte sua lista de pedidos abaixo</p>
     
     <label>Nome na Camisa:</label>
     <input type="text" id="nome" placeholder="Ex: JOÃO">
@@ -30,32 +33,58 @@
 
     <label>Tamanho:</label>
     <select id="tamanho">
-        <option value="PP">PP</option>
-        <option value="P">P</option>
-        <option value="M">M</option>
-        <option value="G">G</option>
-        <option value="GG">GG</option>
-        <option value="EXG">EXG</option>
+        <optgroup label="Infantil">
+            <option value="02">02</option>
+            <option value="04">04</option>
+            <option value="06">06</option>
+            <option value="08">08</option>
+            <option value="10">10</option>
+            <option value="12">12</option>
+            <option value="14">14</option>
+            <option value="16">16</option>
+        </optgroup>
+        <optgroup label="Tradicional Adulto">
+            <option value="PP">PP</option>
+            <option value="P">P</option>
+            <option value="M">M</option>
+            <option value="G">G</option>
+            <option value="GG">GG</option>
+            <option value="EXG">EXG</option>
+        </optgroup>
+        <optgroup label="Babylook">
+            <option value="BL-P">Babylook P</option>
+            <option value="BL-M">Babylook M</option>
+            <option value="BL-G">Babylook G</option>
+            <option value="BL-GG">Babylook GG</option>
+        </optgroup>
     </select>
 
     <button onclick="adicionarItem()">+ ADICIONAR À LISTA</button>
 
     <div class="lista" id="listaConteudo"></div>
-    <div id="resumo"></div>
+    <div id="resumo-box" style="display:none;"></div>
 
-    <button onclick="enviarWhatsApp()" style="background-color: #075e54;">ENVIAR PEDIDO COMPLETO</button>
+    <button onclick="enviarWhatsApp()" style="background-color: #075e54; margin-top: 25px;">ENVIAR PEDIDO PARA O WHATSAPP</button>
 </div>
 
 <script>
     let itens = [];
-    let grade = { "PP": 0, "P": 0, "M": 0, "G": 0, "GG": 0, "EXG": 0 };
+    let grade = { 
+        "02": 0, "04": 0, "06": 0, "08": 0, "10": 0, "12": 0, "14": 0, "16": 0,
+        "PP": 0, "P": 0, "M": 0, "G": 0, "GG": 0, "EXG": 0,
+        "BL-P": 0, "BL-M": 0, "BL-G": 0, "BL-GG": 0 
+    };
 
     function adicionarItem() {
-        const nome = document.getElementById('nome').value.toUpperCase();
-        const numero = document.getElementById('numero').value;
-        const tamanho = document.getElementById('tamanho').value;
+        const nomeInput = document.getElementById('nome');
+        const numeroInput = document.getElementById('numero');
+        const tamanhoInput = document.getElementById('tamanho');
 
-        if (nome === "") { alert("Digite o nome!"); return; }
+        const nome = nomeInput.value.toUpperCase().trim();
+        const numero = numeroInput.value.trim() || "S/N";
+        const tamanho = tamanhoInput.value;
+
+        if (nome === "") { alert("Por favor, digite o nome!"); return; }
 
         const item = { nome, numero, tamanho };
         itens.push(item);
@@ -63,32 +92,41 @@
 
         atualizarTela();
         
-        document.getElementById('nome').value = "";
-        document.getElementById('numero').value = "";
-        document.getElementById('nome').focus();
+        nomeInput.value = "";
+        numeroInput.value = "";
+        nomeInput.focus();
     }
 
     function atualizarTela() {
         const listaDiv = document.getElementById('listaConteudo');
-        const resumoDiv = document.getElementById('resumo');
+        const resumoDiv = document.getElementById('resumo-box');
         
         listaDiv.innerHTML = "";
         itens.forEach((it) => {
-            listaDiv.innerHTML += `<div class="item">${it.nome} | ${it.numero} | ${it.tamanho}</div>`;
+            listaDiv.innerHTML += `<div class="item"><span>${it.nome} | ${it.numero}</span> <b>${it.tamanho}</b></div>`;
         });
 
-        let resumoTexto = "RESUMO: ";
-        for (let tam in grade) {
-            if (grade[tam] > 0) resumoTexto += `${tam}: ${grade[tam]} | `;
+        if (itens.length > 0) {
+            resumoDiv.style.display = "block";
+            let resumoTexto = "<b>RESUMO DE COSTURA:</b><br>";
+            let total = 0;
+            for (let tam in grade) {
+                if (grade[tam] > 0) {
+                    resumoTexto += `${tam}: ${grade[tam]} | `;
+                    total += grade[tam];
+                }
+            }
+            resumoTexto += `<span class="total-destaque">TOTAL GERAL: ${total} camisas</span>`;
+            resumoDiv.innerHTML = resumoTexto;
         }
-        resumoDiv.innerText = resumoTexto;
     }
 
     function enviarWhatsApp() {
         if (itens.length === 0) { alert("A lista está vazia!"); return; }
 
-        let mensagem = "*NOVO PEDIDO - ESTAMPARIA SABARÁ*\n\n";
-        mensagem += "*LISTA DE NOMES:*\n";
+        let mensagem = "*PEDIDO - ESTAMPARIA SABARÁ*\n\n";
+        mensagem += "*LISTA DE PRODUÇÃO:*\n";
+        mensagem += "_Nome | Nº | Tam_\n";
         itens.forEach(it => {
             mensagem += `${it.nome} | ${it.numero} | ${it.tamanho}\n`;
         });
@@ -101,9 +139,9 @@
                 total += grade[tam];
             }
         }
-        mensagem += `*TOTAL GERAL: ${total} camisas*`;
+        mensagem += `\n*TOTAL GERAL: ${total} camisas*`;
 
-        const fone = "5531984104553"; // COLOQUE SEU NÚMERO AQUI
+        const fone = "55319XXXXXXXX"; // <-- COLOQUE SEU NÚMERO AQUI
         window.open(`https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`);
     }
 </script>
