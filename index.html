@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estamparia Sabará - Pedidos</title>
+    <title>Estamparia Sabará - Pedidos v3</title>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; }
         .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -34,28 +34,25 @@
     <label>Tamanho:</label>
     <select id="tamanho">
         <optgroup label="Infantil">
-            <option value="02">02</option>
-            <option value="04">04</option>
-            <option value="06">06</option>
-            <option value="08">08</option>
-            <option value="10">10</option>
-            <option value="12">12</option>
-            <option value="14">14</option>
-            <option value="16">16</option>
+            <option value="PP INF">PP INF</option>
+            <option value="P INF">P INF</option>
+            <option value="M INF">M INF</option>
+            <option value="GI">GI</option>
         </optgroup>
         <optgroup label="Tradicional Adulto">
-            <option value="PP">PP</option>
             <option value="P">P</option>
             <option value="M">M</option>
             <option value="G">G</option>
             <option value="GG">GG</option>
-            <option value="EXG">EXG</option>
+            <option value="EXG 1">EXG 1</option>
+            <option value="EXG 2">EXG 2</option>
         </optgroup>
-        <optgroup label="Babylook">
-            <option value="BL-P">Babylook P</option>
-            <option value="BL-M">Babylook M</option>
-            <option value="BL-G">Babylook G</option>
-            <option value="BL-GG">Babylook GG</option>
+        <optgroup label="Feminino (Babylook)">
+            <option value="PPBL">PPBL</option>
+            <option value="PBL">PBL</option>
+            <option value="MBL">MBL</option>
+            <option value="GBL">GBL</option>
+            <option value="GGBL">GGBL</option>
         </optgroup>
     </select>
 
@@ -70,9 +67,9 @@
 <script>
     let itens = [];
     let grade = { 
-        "02": 0, "04": 0, "06": 0, "08": 0, "10": 0, "12": 0, "14": 0, "16": 0,
-        "PP": 0, "P": 0, "M": 0, "G": 0, "GG": 0, "EXG": 0,
-        "BL-P": 0, "BL-M": 0, "BL-G": 0, "BL-GG": 0 
+        "PP INF": 0, "P INF": 0, "M INF": 0, "GI": 0,
+        "P": 0, "M": 0, "G": 0, "GG": 0, "EXG 1": 0, "EXG 2": 0,
+        "PPBL": 0, "PBL": 0, "MBL": 0, "GBL": 0, "GGBL": 0 
     };
 
     function adicionarItem() {
