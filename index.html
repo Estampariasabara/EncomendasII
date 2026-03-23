@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estamparia Sabará - Pedidos v3</title>
+    <title>Estamparia Sabará - Pedidos v4</title>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; }
         .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -11,12 +11,13 @@
         p.sub { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
         label { display: block; margin-top: 10px; font-weight: bold; }
         input, select, button { width: 100%; padding: 12px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
-        button { background-color: #25d366; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 15px; }
-        button:hover { background-color: #128c7e; }
+        .btn-add { background-color: #25d366; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .btn-add:hover { background-color: #128c7e; }
         .lista { margin-top: 20px; border-top: 2px solid #eee; padding-top: 10px; }
-        .item { background: #f9f9f9; padding: 8px; margin-bottom: 5px; border-left: 4px solid #25d366; font-size: 14px; display: flex; justify-content: space-between; }
-        #resumo-box { background: #e7f3ef; padding: 10px; margin-top: 15px; border-radius: 5px; font-size: 13px; color: #333; line-height: 1.6; }
-        .total-destaque { font-weight: bold; color: #075e54; font-size: 15px; display: block; margin-top: 5px; border-top: 1px solid #ccc; padding-top: 5px; }
+        .item { background: #f9f9f9; padding: 10px; margin-bottom: 8px; border-left: 4px solid #25d366; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-del { background-color: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-weight: bold; margin-left: 10px; width: auto; margin-top: 0; }
+        #resumo-box { background: #e7f3ef; padding: 15px; margin-top: 15px; border-radius: 5px; font-size: 14px; color: #333; line-height: 1.6; border: 1px solid #c2e0d6; }
+        .total-destaque { font-weight: bold; color: #075e54; font-size: 16px; display: block; margin-top: 8px; border-top: 1px solid #ccc; padding-top: 8px; }
     </style>
 </head>
 <body>
@@ -56,21 +57,16 @@
         </optgroup>
     </select>
 
-    <button onclick="adicionarItem()">+ ADICIONAR À LISTA</button>
+    <button class="btn-add" onclick="adicionarItem()">+ ADICIONAR À LISTA</button>
 
     <div class="lista" id="listaConteudo"></div>
     <div id="resumo-box" style="display:none;"></div>
 
-    <button onclick="enviarWhatsApp()" style="background-color: #075e54; margin-top: 25px;">ENVIAR PEDIDO PARA O WHATSAPP</button>
+    <button onclick="enviarWhatsApp()" style="background-color: #075e54; margin-top: 25px; color: white; font-weight: bold; border: none; cursor: pointer; padding: 15px; border-radius: 5px; width: 100%;">ENVIAR PEDIDO PARA O WHATSAPP</button>
 </div>
 
 <script>
     let itens = [];
-    let grade = { 
-        "PP INF": 0, "P INF": 0, "M INF": 0, "GI": 0,
-        "P": 0, "M": 0, "G": 0, "GG": 0, "EXG 1": 0, "EXG 2": 0,
-        "PPBL": 0, "PBL": 0, "MBL": 0, "GBL": 0, "GGBL": 0 
-    };
 
     function adicionarItem() {
         const nomeInput = document.getElementById('nome');
@@ -83,9 +79,7 @@
 
         if (nome === "") { alert("Por favor, digite o nome!"); return; }
 
-        const item = { nome, numero, tamanho };
-        itens.push(item);
-        grade[tamanho]++;
+        itens.push({ nome, numero, tamanho });
 
         atualizarTela();
         
@@ -94,27 +88,42 @@
         nomeInput.focus();
     }
 
+    function removerItem(index) {
+        itens.splice(index, 1);
+        atualizarTela();
+    }
+
     function atualizarTela() {
         const listaDiv = document.getElementById('listaConteudo');
         const resumoDiv = document.getElementById('resumo-box');
         
         listaDiv.innerHTML = "";
-        itens.forEach((it) => {
-            listaDiv.innerHTML += `<div class="item"><span>${it.nome} | ${it.numero}</span> <b>${it.tamanho}</b></div>`;
+        let gradeContagem = {};
+        let total = 0;
+
+        itens.forEach((it, index) => {
+            listaDiv.innerHTML += `
+                <div class="item">
+                    <span><b>${it.nome}</b> | ${it.numero} | ${it.tamanho}</span>
+                    <button class="btn-del" onclick="removerItem(${index})">X</button>
+                </div>`;
+            
+            // Contagem para o resumo
+            gradeContagem[it.tamanho] = (gradeContagem[it.tamanho] || 0) + 1;
+            total++;
         });
 
         if (itens.length > 0) {
             resumoDiv.style.display = "block";
             let resumoTexto = "<b>RESUMO DE COSTURA:</b><br>";
-            let total = 0;
-            for (let tam in grade) {
-                if (grade[tam] > 0) {
-                    resumoTexto += `${tam}: ${grade[tam]} | `;
-                    total += grade[tam];
-                }
+            
+            for (let tam in gradeContagem) {
+                resumoTexto += `${tam}: ${gradeContagem[tam]} | `;
             }
             resumoTexto += `<span class="total-destaque">TOTAL GERAL: ${total} camisas</span>`;
             resumoDiv.innerHTML = resumoTexto;
+        } else {
+            resumoDiv.style.display = "none";
         }
     }
 
@@ -124,17 +133,19 @@
         let mensagem = "*PEDIDO - ESTAMPARIA SABARÁ*\n\n";
         mensagem += "*LISTA DE PRODUÇÃO:*\n";
         mensagem += "_Nome | Nº | Tam_\n";
+        
+        let gradeContagem = {};
+        let total = 0;
+
         itens.forEach(it => {
             mensagem += `${it.nome} | ${it.numero} | ${it.tamanho}\n`;
+            gradeContagem[it.tamanho] = (gradeContagem[it.tamanho] || 0) + 1;
+            total++;
         });
 
         mensagem += "\n*RESUMO PARA COSTURA:*\n";
-        let total = 0;
-        for (let tam in grade) {
-            if (grade[tam] > 0) {
-                mensagem += `${tam}: ${grade[tam]}\n`;
-                total += grade[tam];
-            }
+        for (let tam in gradeContagem) {
+            mensagem += `${tam}: ${gradeContagem[tam]}\n`;
         }
         mensagem += `\n*TOTAL GERAL: ${total} camisas*`;
 
